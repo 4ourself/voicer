@@ -1,4 +1,4 @@
-# Voicer - open-source, real-time voice-changer.
+# Voicer 
 ![Python](https://img.shields.io/badge/python-3670A0.svg?style=for-the-badge&logo=python&logoColor=ffdd54)
 
 Real-time voice changer for Windows 10 and 11. It runs in the terminal, takes your microphone, applies effects and
