@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from .devices import DeviceInfo, _sd, wasapi_settings
+from .devices import DeviceInfo, _sd, close_stream, wasapi_settings
 
 
 class OutputSink:
@@ -48,13 +48,9 @@ class OutputSink:
             self.stream.start()
             self.info = info
         except Exception as e:  # noqa: BLE001
-            self.stream = None
+            self.stop()
             raise RuntimeError(f"cannot open {self.name} device '{info.name}': {e}") from e
 
     def stop(self) -> None:
-        if self.stream is not None:
-            try:
-                self.stream.stop()
-                self.stream.close()
-            finally:
-                self.stream = None
+        stream, self.stream = self.stream, None
+        close_stream(stream)
