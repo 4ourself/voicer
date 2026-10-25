@@ -165,6 +165,15 @@ class AudioEngine:
             self._close_all()
             self.sr = int(self.cfg.get("audio.sample_rate"))
             self.block = int(self.cfg.get("audio.block_size"))
+            if self.processor.sample_rate != self.sr:
+                # Delay lines and filter coefficients depend on the stream rate.
+                # Preserve live settings, which may not have been persisted yet.
+                settings, bypass = self.processor.to_dict(), self.processor.bypass
+                self.processor = VoiceProcessor(self.sr)
+                self.processor.load_dict(settings)
+                self.processor.bypass = bypass
+                self._mic_ring = RingBuffer(self.sr, 1)
+                self._mon_ring = RingBuffer(self.sr, 2)
             jitter = int(self.cfg.get("audio.jitter_blocks"))
             self.output_mono = bool(self.cfg.get("audio.output_mono"))
             self._mic_reader = JitterReader(self._mic_ring, jitter)

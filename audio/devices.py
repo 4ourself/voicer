@@ -21,6 +21,21 @@ def _sd():
     return sd
 
 
+def close_stream(stream) -> None:
+    """Release a stream even when a disconnected device rejects stop/close.
+
+    Cleanup must not prevent releasing the remaining devices or retrying a
+    different channel count after a failed start.
+    """
+    if stream is None:
+        return
+    for operation in (stream.stop, stream.close):
+        try:
+            operation()
+        except Exception:  # noqa: BLE001 - best-effort cleanup of a lost device
+            pass
+
+
 @dataclass
 class DeviceInfo:
     index: int
@@ -46,6 +61,8 @@ def hostapi_names() -> list[str]:
 def preferred_hostapi(setting: str = "auto") -> str:
     sd = _sd()
     names = hostapi_names()
+    if not names:
+        raise AudioBackendError("No audio systems are available. Check your audio drivers.")
     if setting not in (None, "auto") and setting in names:
         return setting
     if sys.platform == "win32":
